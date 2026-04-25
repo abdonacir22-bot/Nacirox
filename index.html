@@ -462,26 +462,38 @@
             listenToNotifications(user.uid);
             listenToWithdrawHistory(user.uid);
             
-            const rtdbRef = ref(rtdb, 'users/' + user.uid + '/gems');
-            onValue(rtdbRef, (snap) => {
-                const gems = snap.val() || 0;
-                const pointsEl = document.getElementById('points-count');
-                const modalPointsEl = document.getElementById('modal-user-points');
-                const gemIcon = document.getElementById('gem-icon-main');
-                if (pointsEl) {
-                    const currentPoints = parseInt(pointsEl.innerText) || 0;
-                    if (!initialLoad && gems > currentPoints) {
-                        coinSound.play().catch(e => {});
-                        pointsEl.classList.add('points-bump');
-                        gemIcon.classList.add('animate-pulse');
-                        setTimeout(() => { pointsEl.classList.remove('points-bump'); gemIcon.classList.remove('animate-pulse'); }, 600);
-                    }
-                    pointsEl.innerText = gems;
-                    if(modalPointsEl) modalPointsEl.innerText = gems;
-                }
-                initialLoad = false;
-            });
+            // ابحث عن هذا الجزء واحذفه:
+// const rtdbRef = ref(rtdb, 'users/' + user.uid + '/gems');
+// onValue(rtdbRef, (snap) => { ... });
+
+// وضع مكانه هذا الكود لمراقبة Firestore:
+             onSnapshot(userRef, (snap) => {
+                if (snap.exists()) {
+        const userData = snap.data();
+        const gems = userData.points || 0; // تأكد أن الاسم "points" كما في باقي الكود
+        const pointsEl = document.getElementById('points-count');
+        const modalPointsEl = document.getElementById('modal-user-points');
+        const gemIcon = document.getElementById('gem-icon-main');
+
+        if (pointsEl) {
+            const currentPoints = parseInt(pointsEl.innerText) || 0;
+            if (!initialLoad && gems > currentPoints) {
+                coinSound.play().catch(e => {});
+                pointsEl.classList.add('points-bump');
+                gemIcon.classList.add('animate-pulse');
+                setTimeout(() => {
+                    pointsEl.classList.remove('points-bump');
+                    gemIcon.classList.remove('animate-pulse');
+                }, 600);
+            }
+            pointsEl.innerText = gems;
+            if(modalPointsEl) modalPointsEl.innerText = gems;
         }
+        initialLoad = false;
+    }
+             });
+
+         }
 
         function initAdmin() {
             onSnapshot(collection(db, "users"), (snap) => {
