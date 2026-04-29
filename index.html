@@ -405,7 +405,18 @@
                 window.showTopNotif(`تم تأكيد شحن "${item}" بنجاح!`);
             } catch (e) { console.error(e); }
         };
+        window.deleteTask = async (taskId) => {
+    if (confirm("واش بصح بغيتي تمسح هاد المهمة؟")) {
+        try {
+            await deleteDoc(doc(db, "tasks", taskId));
+         window.showTopNotif("تم حذف المهمة بنجاح ✅");
+        } catch (e) {
+            console.error(e);
+        }
+    }
+};
 
+        
         window.rejectWithdraw = async (id, userId, item, price) => {
             const reason = prompt("يرجى كتابة سبب رفض طلب السحب:");
             if (reason !== null) {
